@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <!-- KendoGrid CSS -->
-    <link href="https://kendo.cdn.telerik.com/2022.2.802/styles/kendo.default-main.min.css" rel="stylesheet" />
+    <link href="https://kendo.cdn.telerik.com/2022.2.802/styles/kendo.bootstrap-main.min.css" rel="stylesheet" />
 
     <title>Joinner CRUD!</title>
 
@@ -50,6 +50,7 @@
     </script>
     <script src="https://code.jquery.com/jquery-1.12.3.min.js"></script>
     <script src="https://kendo.cdn.telerik.com/2022.2.802/js/kendo.all.min.js"></script>
+
     <script src="{{asset('js/crud.js')}}"></script>
 </body>
 

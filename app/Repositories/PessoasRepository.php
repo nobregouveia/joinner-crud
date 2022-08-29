@@ -3,10 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Pessoa;
-use Illuminate\Support\Facades\DB;
-use Exception;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
+use Illuminate\Database\Eloquent\Collection;
 
 class PessoasRepository
 {
@@ -17,7 +14,7 @@ class PessoasRepository
         $this->model = $model;
     }
 
-    public function index()
+    public function index(): Collection
     {
         $fields = [
             'pessoas.id',
@@ -36,69 +33,18 @@ class PessoasRepository
         return $result;
     }
 
-    public function store(array $dados): JsonResponse
+    public function store(array $dados): Pessoa
     {
-        DB::beginTransaction();
-
-        try {
-            $query = $this->model->create($dados);
-
-            DB::commit();
-
-            return response()->json([
-                'dados' => $query,
-                'erro' => null,
-            ], Response::HTTP_CREATED);
-        } catch (Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'dados' => null,
-                'erro' => $e->getMessage(),
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return $this->model->create($dados);
     }
 
-    public function update(array $dados): JsonResponse
+    public function update(array $dados): int
     {
-        DB::beginTransaction();
-
-        try {
-            $this->model->where('id', $dados['id'])->update($dados);
-
-            DB::commit();
-
-            return response()->json([
-                'dados' => true,
-                'erro' => null,
-            ], Response::HTTP_OK);
-        } catch (Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'dados' => null,
-                'erro' => $e->getMessage(),
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return $this->model->where('id', $dados['id'])->update($dados);
     }
 
-    public function destroy(array $dados): JsonResponse
+    public function destroy(array $dados): int
     {
-        DB::beginTransaction();
-
-        try {
-            $this->model->where('id', $dados['id'])->delete();
-
-            DB::commit();
-
-            return response()->json([
-                'dados' => true,
-                'erro' => null,
-            ], Response::HTTP_OK);
-        } catch (Exception $e) {
-            DB::rollback();
-            return response()->json([
-                'dados' => null,
-                'erro' => $e->getMessage(),
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return $this->model->where('id', $dados['id'])->delete();
     }
 }

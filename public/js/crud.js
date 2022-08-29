@@ -1,6 +1,5 @@
 $(document).ready(function() {
-    var bool = false;
-    var crudServiceBaseUrl = "http://localhost:8000",
+    var crudServiceBaseUrl = "http://localhost:8000/api",
         dataSource = new kendo.data.DataSource({
             transport: {
                 read: {
@@ -17,6 +16,10 @@ $(document).ready(function() {
                     dataType: "json",
                     complete: function(e) {
                         $("#grid").data("kendoGrid").dataSource.read();
+                        if (e.status !== 201 || e.status !== 200) {
+                            console.log(e)
+                            alert(e.responseJSON.erro[0])
+                        }
                     }
                 },
                 destroy: {
@@ -35,12 +38,15 @@ $(document).ready(function() {
                     method: "post",
                     dataType: "json",
                     complete: function(e) {
-                        if (e.status === 201) {
+                        if (e.status === 201 || e.status === 200) {
                             setTimeout(function myfunction() {
                                 $("#grid").data("kendoGrid").dataSource.read();
                             });
+                        } else {
+                            alert(e.responseJSON.erro[0])
                         }
                     }
+
                 },
                 parameterMap: function(options, operation) {
                     if (operation !== "read" && options.models) {
@@ -108,6 +114,7 @@ $(document).ready(function() {
             {
                 field: "nascimento_br",
                 title: "Data Nascimento",
+                format: "{0: dd/MM/yyyy}",
                 width: "180px",
                 editor: onDatePicker
             },
@@ -177,15 +184,17 @@ $(document).ready(function() {
     }
 
     function onDatePicker(container, options) {
-        $('<input required name="Nascimento" data-bind="value:' + options.field + '"/>')
+        $('<input type="date" data-date="" data-date-format="dd/MM/yyyy" required="required" name="Nascimento" data-bind="value:' + options.field + '"/>')
             .appendTo(container)
             .kendoDatePicker({
                 value: "nascimento_br",
                 dateInput: true,
+                componentType: "modern",
                 autoBind: true,
                 weekNumber: true,
+                required: true,
                 readonly: true,
-                format: "dd/MM/yyyy",
-            }).data("kendoDatePicker");;
+                format: "dd/MM/yyyy"
+            }).data("kendoDatePicker");
     }
 });

@@ -4,6 +4,10 @@ namespace App\Services;
 
 use App\Repositories\PessoasRepository;
 use Illuminate\Http\Request;
+use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class PessoasService
 {
@@ -19,35 +23,84 @@ class PessoasService
         return $this->repository->index();
     }
 
-    public function store(Request $request)
+    public function store(array $request): JsonResponse
     {
-        $pessoa = json_decode($request['models']);
-        unset($pessoa[0]->id);
-        $pessoa[0]->nascimento = implode('-', array_reverse(explode('/', $pessoa[0]->nascimento_br)));
-        return $this->repository->store((array)$pessoa[0]);
+        DB::beginTransaction();
+
+        try {
+            unset($request[0]->id);
+            $request[0]->nascimento = $request[0]->nascimento_br;
+            $dados = $this->repository->store((array)$request[0]);
+
+            DB::commit();
+
+            return response()->json([
+                'dados' => $dados,
+                'erro' => null,
+            ], Response::HTTP_CREATED);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'dados' => null,
+                'erro' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
     }
 
-    public function update(Request $request)
+    public function update(array $request): JsonResponse
     {
-        $pessoa = json_decode($request['models']);
+        DB::beginTransaction();
 
-        unset($pessoa[0]->created_at);
-        unset($pessoa[0]->updated_at);
+        try {
+            unset($request[0]->created_at);
+            unset($request[0]->updated_at);
 
-        $pessoa[0]->nascimento = $pessoa[0]->nascimento_br;
+            $request[0]->nascimento = $request[0]->nascimento_br;
 
-        if (!intval($pessoa[0]->pais)) unset($pessoa[0]->pais);
+            if (!intval($request[0]->pais)) unset($request[0]->pais);
 
-        unset($pessoa[0]->pais_id);
-        unset($pessoa[0]->País_input);
-        unset($pessoa[0]->nascimento_br);
+            unset($request[0]->pais_id);
+            unset($request[0]->País_input);
+            unset($request[0]->nascimento_br);
 
-        return $this->repository->update((array)$pessoa[0]);
+            $this->repository->update((array)$request[0]);
+
+            DB::commit();
+
+            return response()->json([
+                'dados' => true,
+                'erro' => null,
+            ], Response::HTTP_OK);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'dados' => null,
+                'erro' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
-    public function destroy(Request $request)
+    public function destroy(Request $request): JsonResponse
     {
-        $pessoa = json_decode($request['models']);
-        return $this->repository->destroy((array)$pessoa[0]);
+        DB::beginTransaction();
+
+        try {
+            $pessoa = json_decode($request['models']);
+            $this->repository->destroy((array)$pessoa[0]);
+
+            DB::commit();
+
+            return response()->json([
+                'dados' => true,
+                'erro' => null,
+            ], Response::HTTP_OK);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'dados' => null,
+                'erro' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
